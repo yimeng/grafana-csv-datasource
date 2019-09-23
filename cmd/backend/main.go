@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	gf "github.com/marcusolsson/grafana-csv-datasource/cmd/backend/grafana"
+	gf "github.com/grafana/grafana-plugin-sdk-go"
+	"github.com/grafana/grafana-plugin-sdk-go/dataframe"
 )
 
 type CSVQuery struct {
@@ -27,13 +27,11 @@ type CSVDatasource struct {
 	logger *log.Logger
 }
 
-func (d *CSVDatasource) ID() string {
-	return "marcusolsson-csv-datasource"
-}
+const pluginID = "marcusolsson-csv-datasource"
 
-func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.Datasource, queries []gf.Query) ([]gf.QueryResult, error) {
+func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.DatasourceInfo, queries []gf.Query) ([]gf.QueryResult, error) {
 	var opts CSVOptions
-	if err := json.Unmarshal(ds.JsonData, &opts); err != nil {
+	if err := json.Unmarshal(ds.JSONData, &opts); err != nil {
 		return nil, err
 	}
 
@@ -41,7 +39,7 @@ func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.Dataso
 
 	for _, q := range queries {
 		var query CSVQuery
-		if err := json.Unmarshal(q.ModelJson, &query); err != nil {
+		if err := json.Unmarshal(q.ModelJSON, &query); err != nil {
 			d.logger.Println(err)
 			continue
 		}
@@ -54,9 +52,13 @@ func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.Dataso
 			continue
 		}
 
+		for _, v := range frame.Fields {
+			d.logger.Printf("%+v", v)
+		}
+
 		res = append(res, gf.QueryResult{
 			RefID:      query.RefID,
-			DataFrames: []gf.DataFrame{frame},
+			DataFrames: []*dataframe.DataFrame{frame},
 		})
 	}
 
@@ -66,25 +68,25 @@ func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.Dataso
 func main() {
 	logger := log.New(os.Stderr, "", 0)
 
-	g := gf.New()
+	g := gf.NewServer()
 
-	g.Register(&CSVDatasource{
+	g.HandleDatasource(pluginID, &CSVDatasource{
 		logger: logger,
 	})
 
-	if err := g.Run(); err != nil {
+	if err := g.Serve(); err != nil {
 		logger.Fatal(err)
 	}
 }
 
-func parseCSV(path string, fields []string) (gf.DataFrame, error) {
+func parseCSV(path string, fields []string) (*dataframe.DataFrame, error) {
 	if len(fields) < 2 {
-		return gf.DataFrame{}, errors.New("requires at least 2 fields")
+		return &dataframe.DataFrame{}, nil
 	}
 
 	f, err := os.Open(path)
 	if err != nil {
-		return gf.DataFrame{}, err
+		return nil, err
 	}
 	defer f.Close()
 
@@ -92,7 +94,7 @@ func parseCSV(path string, fields []string) (gf.DataFrame, error) {
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		return gf.DataFrame{}, err
+		return nil, err
 	}
 
 	columns := make(map[string][]string)
@@ -108,43 +110,50 @@ func parseCSV(path string, fields []string) (gf.DataFrame, error) {
 		}
 	}
 
-	rows := rowsFromCols(columns, fields)
-
-	pts := []gf.Point{}
-	for _, row := range rows {
-		if len(row) != 2 {
+	var dffs []*dataframe.Field
+	for _, n := range fields {
+		vs, ok := columns[n]
+		if !ok {
 			continue
 		}
 
-		t, err := time.Parse(time.RFC3339, row[0])
-		if err != nil {
-			return gf.DataFrame{}, nil
+		if tryType(vs, dataframe.FieldTypeTime) {
+			res := make([]time.Time, 0)
+			for _, v := range vs {
+				t, _ := time.Parse(time.RFC3339, v)
+				res = append(res, t)
+			}
+			dffs = append(dffs, dataframe.NewField(n, dataframe.FieldTypeTime, res))
+		} else if tryType(vs, dataframe.FieldTypeNumber) {
+			res := make([]float64, 0)
+			for _, v := range vs {
+				f, _ := strconv.ParseFloat(v, 64)
+				res = append(res, f)
+			}
+			dffs = append(dffs, dataframe.NewField(n, dataframe.FieldTypeNumber, res))
+		} else {
+			dffs = append(dffs, dataframe.NewField(n, dataframe.FieldTypeString, vs))
 		}
-
-		f, err := strconv.ParseFloat(row[1], 64)
-		if err != nil {
-			return gf.DataFrame{}, nil
-		}
-
-		pts = append(pts, gf.Point{
-			Timestamp: t,
-			Value:     f,
-		})
 	}
 
-	return gf.DataFrame{
-		Name:   fields[1],
-		Points: pts,
-	}, nil
+	return dataframe.New(path, dataframe.Labels{}, dffs...), nil
 }
 
-func rowsFromCols(cols map[string][]string, fields []string) [][]string {
-	rows := make([][]string, len(cols[fields[0]]))
-
-	for _, f := range fields {
-		for j, v := range cols[f] {
-			rows[j] = append(rows[j], v)
+func tryType(vals []string, t dataframe.FieldType) bool {
+	for _, v := range vals {
+		switch t {
+		case dataframe.FieldTypeTime:
+			_, err := time.Parse(time.RFC3339, v)
+			if err != nil {
+				return false
+			}
+		case dataframe.FieldTypeNumber:
+			_, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				return false
+			}
 		}
 	}
-	return rows
+
+	return true
 }

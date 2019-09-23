@@ -56,27 +56,11 @@ export class CSVDataSource extends DataSourceApi<CSVQuery, CSVOptions> {
   }
 
   testDatasource() {
-    const requestData: Request = {
-      from: '5m',
-      to: 'now',
-      queries: [
-        {
-          datasourceId: this.id,
-        },
-      ],
-    };
-
-    return getBackendSrv()
-      .post('/api/tsdb/query', requestData)
-      .then((response: any) => {
-        if (response.status === 200) {
-          return { status: 'success', message: 'Data source is working', title: 'Success' };
-        } else {
-          return { status: 'failed', message: 'Data source is not working', title: 'Error' };
-        }
-      })
-      .catch((error: any) => {
-        return { status: 'failed', message: 'Data source is not working', title: 'Error' };
+    return new Promise((resolve, reject) => {
+      resolve({
+        status: 'success',
+        message: 'Success',
       });
+    });
   }
 }
