@@ -1,15 +1,8 @@
 import _ from 'lodash';
 
-import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings, DataQuery, DataSourceJsonData } from '@grafana/ui';
+import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/ui';
+import { CSVQuery, CSVDataSourceOptions } from './types';
 import { getBackendSrv } from '@grafana/runtime';
-
-export interface CSVQuery extends DataQuery {
-  fields?: string;
-}
-
-export interface CSVOptions extends DataSourceJsonData {
-  path?: string;
-}
 
 interface Request {
   queries: any[];
@@ -17,13 +10,19 @@ interface Request {
   to?: string;
 }
 
-export class CSVDataSource extends DataSourceApi<CSVQuery, CSVOptions> {
-  constructor(instanceSettings: DataSourceInstanceSettings<CSVOptions>) {
+export class CSVDataSource extends DataSourceApi<CSVQuery, CSVDataSourceOptions> {
+  constructor(instanceSettings: DataSourceInstanceSettings<CSVDataSourceOptions>) {
     super(instanceSettings);
   }
 
   query(options: DataQueryRequest<CSVQuery>): Promise<DataQueryResponse> {
-    const requestData: Request = {
+    const { range } = options;
+    const from = range.from.valueOf();
+    const to = range.to.valueOf();
+
+    const data: Request = {
+      from: from.toString(),
+      to: to.toString(),
       queries: options.targets.map((target: any) => {
         return {
           datasourceId: this.id,
@@ -33,13 +32,8 @@ export class CSVDataSource extends DataSourceApi<CSVQuery, CSVOptions> {
       }),
     };
 
-    if (options.range) {
-      requestData.from = options.range.from.valueOf().toString();
-      requestData.to = options.range.to.valueOf().toString();
-    }
-
     return getBackendSrv()
-      .post('/api/tsdb/query', requestData)
+      .post('/api/tsdb/query', data)
       .then((response: any) => {
         const res: any = [];
 
@@ -56,7 +50,7 @@ export class CSVDataSource extends DataSourceApi<CSVQuery, CSVOptions> {
   }
 
   testDatasource() {
-    const requestData: Request = {
+    const data: Request = {
       from: '5m',
       to: 'now',
       queries: [
@@ -67,16 +61,12 @@ export class CSVDataSource extends DataSourceApi<CSVQuery, CSVOptions> {
     };
 
     return getBackendSrv()
-      .post('/api/tsdb/query', requestData)
+      .post('/api/tsdb/query', data)
       .then((response: any) => {
-        if (response.status === 200) {
-          return { status: 'success', message: 'Data source is working', title: 'Success' };
-        } else {
-          return { status: 'failed', message: 'Data source is not working', title: 'Error' };
-        }
+        return { status: 'success', message: 'Success' };
       })
       .catch((error: any) => {
-        return { status: 'failed', message: 'Data source is not working', title: 'Error' };
+        return { status: 'failed', message: 'Error' };
       });
   }
 }

@@ -1,5 +1,5 @@
 DATASOURCE=csv-datasource
-GO = GO111MODULE=on go
+GO=GO111MODULE=on go
 
 vendor: ## Vendor Go dependencies
 	$(GO) mod vendor

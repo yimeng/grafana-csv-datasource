@@ -2,9 +2,10 @@ import React, { PureComponent, ChangeEvent } from 'react';
 
 import { FormField, QueryEditorProps } from '@grafana/ui';
 
-import { CSVDataSource, CSVQuery, CSVOptions } from './CSVDataSource';
+import { CSVDataSource } from './CSVDataSource';
+import { CSVQuery, CSVDataSourceOptions } from './types';
 
-type Props = QueryEditorProps<CSVDataSource, CSVQuery, CSVOptions>;
+type Props = QueryEditorProps<CSVDataSource, CSVQuery, CSVDataSourceOptions>;
 
 interface State {}
 
