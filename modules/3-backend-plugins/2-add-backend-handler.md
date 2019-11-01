@@ -1,52 +1,50 @@
 # Add a backend handler
 
-```
-type CSVQuery struct {
+1. Add two structs to represent the query and the options:
+
+```go
+type Query struct {
 	RefID  string `json:"refId"`
-	Fields string `json:"fields"`
+	Values string `json:"values"`
 }
 
-type CSVOptions struct {
+type Options struct {
 	Path string `json:"path"`
 }
+```
 
-type CSVDatasource struct {
-	logger *log.Logger
-}
+2. Implement the `Query` method.
 
-func (d *CSVDatasource) ID() string {
-	return "marcusolsson-csv-datasource"
-}
-
-func (d *CSVDatasource) Query(ctx context.Context, tr gf.TimeRange, ds gf.Datasource, queries []gf.Query) ([]gf.QueryResult, error) {
-	var opts CSVOptions
+```go
+func (d *MyDataSource) Query(ctx context.Context, tr sdk.TimeRange, ds sdk.DataSourceInfo, queries []sdk.Query) ([]sdk.QueryResult, error) {
+	var opts Options
 	if err := json.Unmarshal(ds.JsonData, &opts); err != nil {
 		return nil, err
 	}
 
-	var res []gf.QueryResult
+	var res []sdk.QueryResult
 
 	for _, q := range queries {
-		var query CSVQuery
+		var query Query
 		if err := json.Unmarshal(q.ModelJson, &query); err != nil {
 			return nil, err
 		}
 
-		fields := strings.Split(query.Fields, ",")
+    var values []int
+    for _, val := range strings.Split(query.values, ",") {
+        num, _ := strconv.Atoi(val)
+        values = append(values, num)
+    }
 
-		frame, err := parseCSV(opts.Path, fields)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, gf.QueryResult{
-			RefID:      query.RefID,
-			DataFrames: []gf.DataFrame{frame},
+		res = append(res, sdk.QueryResult{
+        RefID:      query.RefID,
+        DataFrames: []sdk.DataFrame{dataframe.New("", dataframe.Labels{},
+            dataframe.NewField("timestamp", dataframe.FieldTypeTime, []time.Time{}),
+            dataframe.NewField("value", dataframe.FieldTypeNumber, values),
+        )},
 		})
 	}
 
 	return res, nil
 }
 ```
-
-> _Note:_ I've left the implementation for `parseCSV` out of this article for brevity purposes, but feel free to check it out in full on [Github](https://github.com/marcusolsson/grafana-csv-datasource/blob/master/pkg/main.go).

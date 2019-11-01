@@ -9,7 +9,6 @@ Last time, we started writing a data source plugin that would read CSV files. Le
 1.  Create another directory `backend` in your project root directory, containing a `main.go` file. 
 
 ```go
-// backend/main.go
 package main
 
 import (
@@ -17,7 +16,7 @@ import (
 	"log"
 	"os"
 
-	gf "github.com/grafana/grafana-plugin-sdk-go"
+	sdk "github.com/grafana/grafana-plugin-sdk-go"
 )
 
 const pluginID = "myorg-custom-datasource"
@@ -26,14 +25,14 @@ type MyDataSource struct {
 	logger *log.Logger
 }
 
-func (d *MyDataSource) Query(ctx context.Context, tr gf.TimeRange, ds gf.DataSourceInfo, queries []gf.Query) ([]gf.QueryResult, error) {
-	return []gf.QueryResult{}, nil
+func (d *MyDataSource) Query(ctx context.Context, tr sdk.TimeRange, ds sdk.DataSourceInfo, queries []sdk.Query) ([]sdk.QueryResult, error) {
+	return []sdk.QueryResult{}, nil
 }
 
 func main() {
 	logger := log.New(os.Stderr, "", 0)
 
-	srv := gf.NewServer()
+	srv := sdk.NewServer()
 
 	srv.HandleDataSource(pluginID, &MyDataSource{
 		logger: logger,
@@ -65,16 +64,15 @@ go build -o ./dist/csv-datasource_darwin_amd64 ./backend
 
 The binary needs to be bundled into `./dist` directory together with the frontend assets.
 
-3. Update `plugin.json` to make Grafana aware of our backend plugin.
+3. Add a field `executable` to the `plugin.json` to make Grafana aware of our backend plugin.
 
 ```json
-// src/plugin.json
 {
-  "executable": "csv-datasource",
+  "executable": "my-datasource"
 }
 ```
 
-Where the executable is the name of the binary, with the suffix removed.
+The value should be the name of the binary, with the suffix removed.
 
 4. Restart Grafana and verify that your plugin is running:
 

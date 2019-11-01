@@ -25,7 +25,6 @@ interface Request {
 4. In `DataSource.ts`, add the following code:
 
 ```ts
-// src/CSVDataSource.ts
 testDatasource() {
   const requestData: Request = {
     from: '5m',
