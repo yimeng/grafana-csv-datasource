@@ -12,4 +12,4 @@ In this codelab, you'll learn how to build a plugin to integrate with a custom d
 
 1. [Create a new plugin](1-create-a-new-plugin.md)
 1. [Add a config editor](2-add-config-editor.md)
-1. [Add a query editor](2-add-query-editor.md)
+1. [Add a query editor](3-add-query-editor.md)

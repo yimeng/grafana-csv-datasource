@@ -1,4 +1,4 @@
-# Add a Query Editor
+# Add a query editor
 
 Most likely you want your users to be able to select the data they're interested in. For MySQL and PostgreSQL this would be SQL queries, while Prometheus has its own query language, called PromQL. Let's add query support for our plugin, using a custom _query editor_.
 

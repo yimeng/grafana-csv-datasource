@@ -1,4 +1,4 @@
-# Add a Config Editor
+# Add a config editor
 
 For most data sources, you'll want to give your users the ability to configure things like hostname or authentication method. Although our CSV example doesn't require authentication at this point, we might want to set the path to the CSV file. We can accomplish this by adding an _config editor_.
 
