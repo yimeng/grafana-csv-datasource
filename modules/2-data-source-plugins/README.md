@@ -2,8 +2,6 @@
 
 In this codelab, you'll learn how to build a plugin to integrate with a custom data source.
 
-## What you'll learn
-
 ## What you'll need
 
 - Grafana version 6.4+
