@@ -1,14 +1,16 @@
 # Create a new panel plugin
 
-1. In the plugin directory, run the following to create a new panel plugin:
+Tooling for modern web development can be tricky to wrap your head around. While you certainly could write you own webpack configuration, for this guide, I'm going to use grafana-toolkit.
+
+[grafana-toolkit](https://github.com/grafana/grafana/tree/master/packages/grafana-toolkit) is a CLI application that aims to simplify Grafana plugin development, so that you can focus on code, and the toolkit takes care of building and testing it for us.
+
+1. Create a data source plugin from template, using the `plugin:create` command:
 
 ```
-npx grafana-toolkit plugin:create my-panel-plugin
+npx grafana-toolkit plugin:create codelab1
 ```
 
-**Note:** `grafana-toolkit` supports two types of panel plugins; Angular, and React plugins. For this codelab, we're going to create a React plugin.
-
-2. Download dependencies:
+2. Download necessary dependencies:
 
 ```
 yarn install

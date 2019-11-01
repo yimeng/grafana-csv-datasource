@@ -2,8 +2,6 @@
 
 Most likely you want your users to be able to select the data they're interested in. For MySQL and PostgreSQL this would be SQL queries, while Prometheus has its own query language, called PromQL. Let's add query support for our plugin, using a custom _query editor_.
 
-There's a lot we can do when it comes to querying CSV data, like filtering rows based on string values in one of our fields. Let's keep it simple for now though, by letting the user supply a comma separated list of fields to visualize.
-
 1. In `types.ts`, update `MyQuery` to contain a optional field named `values`:
 
 ```ts

@@ -9,7 +9,8 @@ In this codelab, you'll learn how to build a backend plugin to support your data
 ## What you'll need
 
 - Grafana version 6.4+
-- A working data source plugin from the previous module.
+- NodeJS
+- yarn
 - Go
 
 ## Units

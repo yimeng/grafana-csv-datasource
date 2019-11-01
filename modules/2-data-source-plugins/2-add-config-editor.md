@@ -1,6 +1,6 @@
 # Add a config editor
 
-For most data sources, you'll want to give your users the ability to configure things like hostname or authentication method. Although our CSV example doesn't require authentication at this point, we might want to set the path to the CSV file. We can accomplish this by adding an _config editor_.
+For most data sources, you probably want to give your users the ability to configure things like hostname or authentication method. You can accomplish this by adding an _config editor_.
 
 1. In `types.ts`, update `MyDataSourceOptions` to contain a optional field named `path`:
 
@@ -34,6 +34,8 @@ onPathChange = (event: ChangeEvent<HTMLInputElement>) => {
   onOptionsChange({ ...options, jsonData });
 };
 ```
+
+> Note: You might have noticed that we added the path to an object called `jsonData`. This object is automatically persisted for you, and will be made available to your data source implementation as well.
 
 3. Build your assets with `yarn dev`.
 
