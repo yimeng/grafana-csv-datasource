@@ -1,25 +1,8 @@
-# CSV Data Source plugin for Grafana
+# Codelabs
 
-An example of a Data Source plugin for [Grafana](https://www.grafana.com).
+Grafana codelabs are a series of lab assignment to teach you about how to get started developing for Grafana.
 
-__Note:__ This repository exists for experimental purposes only, and is currently not fit for use.
+## Modules
 
-## Directory structure
-
-`cmd/backend` holds the source code for the backend plugin (Go).
-
-`src` holds the source code for the frontend plugin (Typescript).
-
-## Developing
-
-Build frontend plugin:
-
-```
-yarn build
-```
-
-Build backend plugin:
-
-```
-make build-darwin
-```
+- [Build data source plugins](1-data-source-plugins)
+- [Add a backend to your data source plugins](2-backend-plugins)
