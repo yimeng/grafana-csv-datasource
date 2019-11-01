@@ -4,5 +4,5 @@ Grafana codelabs are a series of lab assignment to teach you about how to get st
 
 ## Modules
 
-- [Build data source plugins](1-data-source-plugins)
-- [Add a backend to your data source plugins](2-backend-plugins)
+- [Build data source plugins](modules/1-data-source-plugins)
+- [Add a backend to your data source plugins](modules/2-backend-plugins)
