@@ -2,6 +2,10 @@
 
 In this codelab, you'll learn how to build a backend plugin to support your data source plugin.
 
+## Preqrequisites
+
+- Complete [Build data source plugins](/modules/1-data-source-plugins)
+
 ## What you'll learn
 
 ## What you'll need
