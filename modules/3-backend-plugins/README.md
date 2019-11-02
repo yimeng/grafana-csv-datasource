@@ -15,7 +15,7 @@ In this codelab, you'll learn how to build a backend plugin to support your data
 
 ## Units
 
-1. [Create a backend plugin](1-create-a-backend-plugin.md)
+1. [Create a backend plugin](1-create-backend-plugin.md)
 1. [Add a backend handler](2-add-backend-handler.md)
 1. [Use the backend plugin from the client](3-use-backend-from-client.md)
 
