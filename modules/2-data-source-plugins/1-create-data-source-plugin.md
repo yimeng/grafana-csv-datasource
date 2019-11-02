@@ -16,10 +16,6 @@ npx grafana-toolkit plugin:create codelab2
 yarn install
 ```
 
-```
-yarn add --dev lodash @types/lodash
-```
-
 3. Build the plugin:
 
 ```
